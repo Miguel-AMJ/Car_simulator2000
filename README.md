@@ -32,7 +32,10 @@ O Vite gera caminhos relativos para que os arquivos também funcionem quando o s
 - Drift attack: acumule pontos derrapando durante 60 segundos.
 - Passeio livre: dirija sem cronômetro.
 - WASD ou setas: acelerar, frear e virar. Espaço: freio de mão. Esc: pausar/retomar.
-- Celular: use os controles na tela. Recordes e créditos ficam salvos neste navegador.
+- AUTO: assistência automática regula acelerador e velocidade conforme curvas e árvores próximas; pode ser desligada na HUD.
+- Segure Shift ou o botão ⚡ TURBO: impulso temporário com carga que recarrega ao soltar. O botão AUTO continua acelerando automaticamente durante o turbo.
+- Colisão acima de 250 km/h encerra a corrida. Celular: use os controles na tela, incluindo o botão de turbo.
+- Recordes e créditos ficam salvos neste navegador.
 
 ## Stack
 

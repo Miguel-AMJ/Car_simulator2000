@@ -66,10 +66,19 @@ h1 em, h2 em { color: var(--lime); font-style: normal; }
 .progress-track i { display: block; width: 0; height: 100%; background: var(--lime); transition: width 100ms linear; }
 .pause-button { margin-left: 15px; }
 .hud-actions { display: flex; gap: 8px; margin-left: 14px; }
+.hud-actions > * { flex-shrink: 0; }
 .hud-actions .icon-button { margin: 0; }
 .repair-button { font-size: 16px; }
 .repair-button:disabled { cursor: not-allowed; opacity: .38; }
 .repair-button.has-damage { border-color: var(--lime); color: var(--lime); box-shadow: 0 0 14px rgba(211, 239, 116, .2); }
+.assist-button, .boost-button { height: 38px; border: 1px solid rgba(245, 244, 233, .3); background: rgba(14, 21, 19, .34); color: var(--paper); cursor: pointer; font-size: 9px; font-weight: 800; letter-spacing: .06em; }
+.assist-button { min-width: 48px; }
+.assist-button.is-active { border-color: var(--lime); background: rgba(211, 239, 116, .16); color: var(--lime); }
+.boost-button { display: grid; width: 82px; align-content: center; gap: 4px; padding: 4px 7px; color: #ffd273; }
+.boost-button.is-active { border-color: #ffd273; background: rgba(255, 210, 115, .18); box-shadow: 0 0 15px rgba(255, 210, 115, .2); }
+.boost-button.is-empty { opacity: .5; }
+.turbo-meter { display: block; width: 100%; height: 3px; background: rgba(245, 244, 233, .22); }
+.turbo-meter b { display: block; width: 100%; height: 100%; background: #ffd273; transition: width 80ms linear; }
 .impact-message { position: absolute; z-index: 3; top: 174px; left: 50%; padding: 9px 14px; border-left: 2px solid var(--coral); background: rgba(16, 24, 21, .82); color: var(--paper); font-size: 9px; font-weight: 700; letter-spacing: .09em; opacity: 0; pointer-events: none; transform: translate(-50%, -7px); transition: opacity 160ms ease, transform 160ms ease; }
 .impact-message.is-visible { opacity: 1; transform: translate(-50%, 0); }
 .drive-feedback { position: absolute; z-index: 2; right: clamp(24px, 8vw, 132px); bottom: 20%; display: grid; grid-template-columns: auto auto; column-gap: 8px; align-items: baseline; padding: 11px 14px; border-left: 2px solid var(--lime); background: rgba(16, 24, 21, .72); opacity: 0; transform: translateX(10px); transition: opacity 160ms ease, transform 160ms ease; }
@@ -121,10 +130,15 @@ h1 em, h2 em { color: var(--lime); font-style: normal; }
   .hud-center { min-width: 135px; width: 48%; }
   .hud-label { font-size: 7px; }
   .race-stats { font-size: 14px; }
-  .hud-actions { gap: 6px; margin-left: 8px; }
-  .hud-actions .icon-button { width: 34px; height: 34px; }
+  .hud-left { min-width: 82px; }
+  .hud-center { min-width: 104px; width: auto; flex: 1; }
+  .hud-actions { gap: 4px; margin-left: 6px; }
+  .hud-actions .icon-button { width: 30px; height: 34px; }
+  .assist-button { min-width: 35px; height: 34px; font-size: 8px; }
+  .boost-button { width: 43px; height: 34px; padding: 3px 4px; font-size: 7px; }
   .impact-message { top: 146px; max-width: calc(100% - 32px); white-space: nowrap; }
   .touch-controls { display: flex; }
+  .touch-controls .touch-turbo { width: 48px; height: 58px; border-color: rgba(255, 210, 115, .72); color: #ffd273; font-size: 22px; }
   .drive-feedback { right: 22px; bottom: 185px; }
   .scene-vignette { background: linear-gradient(90deg, rgba(14, 23, 20, .68), rgba(15, 24, 21, .15) 90%), linear-gradient(0deg, rgba(13, 20, 17, .68), transparent 34%, transparent 67%, rgba(15, 22, 20, .25)); }
 }
@@ -133,5 +147,17 @@ h1 em, h2 em { color: var(--lime); font-style: normal; }
   .welcome-panel.is-hidden { transform: translateY(-42%) scale(.84); }
   .topbar { height: 62px; }
   .bottom-bar { min-height: 56px; }
+}
+@media (max-width: 380px) {
+  .game-hud { padding: 9px; }
+  .hud-left { min-width: 70px; }
+  .speed-readout strong { font-size: 30px; }
+  .hud-center { min-width: 65px; }
+  .hud-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hud-actions { gap: 3px; margin-left: 4px; }
+  .hud-actions .icon-button { width: 28px; height: 32px; }
+  .assist-button { min-width: 31px; height: 32px; }
+  .boost-button { width: 35px; height: 32px; font-size: 0; }
+  .boost-button > span { font-size: 13px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }

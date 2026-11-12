@@ -20,6 +20,10 @@
         <div class="hud-center"><div class="hud-label" id="mode-label">SPRINT · COSTA DOURADA</div><div class="race-stats"><span id="lap">VOLTA 1 / 3</span><span class="stat-separator"></span><span id="timer">01:30.0</span></div><div class="progress-track"><i id="progress"></i></div></div>
         <div class="hud-actions">
           <button class="icon-button repair-button" id="repair-button" type="button" aria-label="Consertar carro" title="Consertar carro" disabled>🔧</button>
+          <button class="assist-button is-active" id="assist-button" type="button" aria-label="Assistência de aceleração automática ativada" aria-pressed="true" title="Alternar assistência de aceleração">AUTO</button>
+          <button class="boost-button" id="boost-button" type="button" aria-label="Ativar turbo" title="Segure Shift para usar turbo">
+            <span>⚡ TURBO</span><i class="turbo-meter"><b id="turbo-charge"></b></i>
+          </button>
           <button class="icon-button pause-button" id="pause-button" type="button" aria-label="Pausar corrida" title="Pausar">Ⅱ</button>
         </div>
       </section>
@@ -35,7 +39,7 @@
           <button class="mode-button" type="button" data-mode="free"><span class="mode-index">03</span><span><b>Passeio livre</b><small>Sem pressão · sem limites</small></span><i>↗</i></button>
         </div>
         <div class="panel-actions"><button class="start-button" id="start-button" type="button"><span>COMEÇAR A CORRIDA</span><b aria-hidden="true">→</b></button><div class="personal-best"><span>SEU MELHOR</span><b id="personal-best">--:--.---</b></div></div>
-        <div class="control-hint"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span>ou setas para dirigir</span><span class="hint-divider">·</span><span class="keycap">ESPAÇO</span><span>freio de mão</span></div>
+        <div class="control-hint"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span>ou setas para dirigir</span><span class="hint-divider">·</span><span class="keycap">ESPAÇO</span><span>freio de mão</span><span class="hint-divider">·</span><span class="keycap">SHIFT</span><span>turbo</span></div>
       </section>
       <section class="pause-panel is-hidden" id="pause-panel" aria-live="polite">
         <span class="season-line">PIT STOP <span class="season-rule"></span> CORRIDA PAUSADA</span><h2 id="result-title">PAUSA<br />NO <em>BOX.</em></h2><p id="result-copy">Respire. A pista continua aqui.</p>
@@ -45,7 +49,7 @@
       <footer class="bottom-bar">
         <div class="track-caption"><span class="caption-number">01</span><span><b>ESTRADA DO FAROL</b><small>BAÍA NORTE · 4,8 KM</small></span></div><div class="track-condition"><span class="sun-icon" aria-hidden="true">☼</span><span>SECO</span><i></i><span>24°</span></div><div class="version-label">ARCADE BUILD <b>0.1</b></div>
       </footer>
-      <div class="touch-controls" aria-label="Controles de toque"><div class="touch-steer"><button data-key="ArrowLeft" type="button" aria-label="Virar à esquerda">←</button><button data-key="ArrowRight" type="button" aria-label="Virar à direita">→</button></div><div class="touch-pedals"><button data-key="Space" class="touch-brake" type="button" aria-label="Freio de mão">DRIFT</button><button data-key="ArrowUp" class="touch-gas" type="button" aria-label="Acelerar">▲</button></div></div>
+      <div class="touch-controls" aria-label="Controles de toque"><div class="touch-steer"><button data-key="ArrowLeft" type="button" aria-label="Virar à esquerda">←</button><button data-key="ArrowRight" type="button" aria-label="Virar à direita">→</button></div><div class="touch-pedals"><button data-key="Space" class="touch-brake" type="button" aria-label="Freio de mão">DRIFT</button><button data-key="Turbo" class="touch-turbo" type="button" aria-label="Ativar turbo">⚡</button><button data-key="ArrowUp" class="touch-gas" type="button" aria-label="Acelerar">▲</button></div></div>
     </main>
     <script type="module" src="/src/main.js"></script>
   </body>

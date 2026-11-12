@@ -201,6 +201,8 @@ const ui = {
   personalBest: document.querySelector('#personal-best'), welcome: document.querySelector('#welcome-panel'),
   pausePanel: document.querySelector('#pause-panel'), hud: document.querySelector('#game-hud'), feedback: document.querySelector('#drive-feedback'),
   repairButton: document.querySelector('#repair-button'), impactMessage: document.querySelector('#impact-message'),
+  assistButton: document.querySelector('#assist-button'), boostButton: document.querySelector('#boost-button'),
+  turboCharge: document.querySelector('#turbo-charge'),
 };
 const storageKey = 'apex-run-save-v1';
 let saveData;
@@ -226,6 +228,12 @@ let collisionCooldown = 0;
 let carDamage = 0;
 let dents = [];
 let smokeEmissionTimer = 0;
+let assistEnabled = true;
+let turboCharge = 100;
+let turboActive = false;
+const normalSpeedLimit = 64;
+const turboSpeedLimit = 82;
+const fatalImpactSpeed = 250;
 const keys = new Set();
 const clock = new THREE.Clock();
 let audioContext;
@@ -330,6 +338,46 @@ function repairCar(force = false) {
   ui.repairButton.disabled = true;
   ui.repairButton.classList.remove('has-damage');
   ui.impactMessage.classList.remove('is-visible');
+}
+
+function setAssistEnabled(enabled) {
+  assistEnabled = enabled;
+  ui.assistButton.classList.toggle('is-active', enabled);
+  ui.assistButton.setAttribute('aria-pressed', String(enabled));
+  ui.assistButton.setAttribute('aria-label', `Assistência de aceleração automática ${enabled ? 'ativada' : 'desativada'}`);
+}
+
+function updateTurboCharge(dt, active) {
+  turboActive = active && turboCharge > 0 && gameState === 'playing';
+  turboCharge = THREE.MathUtils.clamp(turboCharge + (turboActive ? -38 : 17) * dt, 0, 100);
+  if (turboCharge <= 0) turboActive = false;
+  ui.turboCharge.style.width = `${turboCharge}%`;
+  ui.boostButton.classList.toggle('is-active', turboActive);
+  ui.boostButton.classList.toggle('is-empty', turboCharge < 1);
+  ui.boostButton.setAttribute('aria-pressed', String(turboActive));
+  ui.boostButton.setAttribute('aria-label', turboActive ? 'Turbo ativado' : 'Ativar turbo');
+}
+
+function getAssistTargetSpeed(progress, tangent) {
+  const lookAhead = THREE.MathUtils.clamp(speed / trackLength * 0.9, 0.012, 0.055);
+  const futureTangent = trackFrame(progress + lookAhead).tangent;
+  const bend = Math.acos(THREE.MathUtils.clamp(tangent.dot(futureTangent), -1, 1));
+  let targetSpeed = THREE.MathUtils.clamp(49 - bend * 25, 25, 49);
+  if (Math.abs(lateralVelocity) > 4) targetSpeed = Math.min(targetSpeed, 33);
+
+  const forward = new THREE.Vector3(Math.sin(car.rotation.y), 0, Math.cos(car.rotation.y));
+  const side = new THREE.Vector3(-forward.z, 0, forward.x);
+  for (const treeData of trees) {
+    if (treeData.fallen) continue;
+    const dx = treeData.x - car.position.x;
+    const dz = treeData.z - car.position.z;
+    const ahead = dx * forward.x + dz * forward.z;
+    const across = Math.abs(dx * side.x + dz * side.z);
+    if (ahead > 0 && ahead < 13 && across < 3.8) {
+      targetSpeed = Math.min(targetSpeed, THREE.MathUtils.clamp((ahead - 3.4) * 2.2, 0, 18));
+    }
+  }
+  return targetSpeed + (turboActive ? 22 : 0);
 }
 
 function applyTreeDamage(treeData, impactSpeed) {
@@ -437,10 +485,10 @@ function checkTreeCollisions() {
   applyTreeDamage(nearest, impactSpeed);
   applyCarDamage(impactSpeed, localImpact);
   collisionCooldown = 1.1;
-  speed = impactSpeed > 80 ? 0 : speed * (impactSpeed < 10 ? 0.55 : 0.24);
+  speed = impactSpeed > fatalImpactSpeed ? 0 : speed * (impactSpeed < 10 ? 0.55 : 0.24);
   lateralVelocity *= -0.3;
 
-  if (impactSpeed > 80) {
+  if (impactSpeed > fatalImpactSpeed) {
     showImpact('COLISÃO CRÍTICA · GAME OVER');
     finishWithCrash();
   } else if (impactSpeed >= 40) showImpact('IMPACTO FORTE · PEÇAS PERDIDAS');
@@ -459,6 +507,10 @@ function startGame() {
   lateralVelocity = 0;
   driftPoints = 0;
   collisionCooldown = 0;
+  turboCharge = 100;
+  turboActive = false;
+  ui.turboCharge.style.width = '100%';
+  ui.boostButton.classList.remove('is-active', 'is-empty');
   bestLap = Infinity;
   lapStartedAt = 0;
   gameState = 'playing';
@@ -482,6 +534,14 @@ function finishGame() {
 
 document.querySelector('#start-button').addEventListener('click', startGame);
 ui.repairButton.addEventListener('click', repairCar);
+ui.assistButton.addEventListener('click', () => setAssistEnabled(!assistEnabled));
+setAssistEnabled(assistEnabled);
+const pressTurbo = (event) => { event.preventDefault(); keys.add('Turbo'); };
+const releaseTurbo = (event) => { event.preventDefault(); keys.delete('Turbo'); };
+ui.boostButton.addEventListener('pointerdown', pressTurbo);
+ui.boostButton.addEventListener('pointerup', releaseTurbo);
+ui.boostButton.addEventListener('pointercancel', releaseTurbo);
+ui.boostButton.addEventListener('pointerleave', releaseTurbo);
 document.querySelector('#resume-button').addEventListener('click', () => {
   if (gameState === 'ended') {
     startGame();
@@ -550,10 +610,21 @@ function updateDriving(dt) {
     const accelerating = inputValue('KeyW', 'ArrowUp');
     const braking = inputValue('KeyS', 'ArrowDown');
     const handbrake = inputValue('Space');
+    updateTurboCharge(dt, inputValue('ShiftLeft', 'ShiftRight', 'Turbo'));
     const steering = Number(inputValue('KeyD', 'ArrowRight')) - Number(inputValue('KeyA', 'ArrowLeft'));
-    if (accelerating) speed += 25 * dt;
-    if (braking) speed -= 38 * dt;
-    speed = Math.max(0, Math.min(64, speed));
+    const progress = (0.15 + distanceTravelled / trackLength) % 1;
+    const { tangent } = trackFrame(progress);
+    const targetSpeed = assistEnabled ? getAssistTargetSpeed(progress, tangent) : 0;
+    const autoThrottle = assistEnabled ? THREE.MathUtils.clamp((targetSpeed - speed) * 0.75, 0, 1) : 0;
+    const throttle = turboActive
+      ? (accelerating ? 1 : autoThrottle)
+      : speed >= normalSpeedLimit ? 0 : (accelerating ? 1 : autoThrottle);
+    const acceleration = 25 + (turboActive ? 35 : 0);
+    speed += throttle * acceleration * dt;
+    if (braking || (assistEnabled && speed > targetSpeed + 2.5)) {
+      speed -= (braking ? 38 : 22) * dt;
+    }
+    speed = Math.max(0, Math.min(turboSpeedLimit, speed));
     speed *= Math.exp(-dt * (handbrake ? 0.58 : 0.11));
 
     lateralVelocity += steering * speed * (handbrake ? 0.42 : 0.25) * dt;
@@ -585,6 +656,7 @@ function updateDriving(dt) {
     if (selectedMode === 'sprint' && completedLaps >= 3) finishGame();
     if ((selectedMode === 'drift' || selectedMode === 'sprint') && remaining <= 0) finishGame();
   }
+  if (gameState !== 'playing') updateTurboCharge(dt, false);
 
   const progress = (0.15 + distanceTravelled / trackLength) % 1;
   const { point, tangent, normal } = trackFrame(progress);
