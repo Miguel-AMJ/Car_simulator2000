@@ -87,10 +87,14 @@ startLine.rotation.y = Math.atan2(startFrame.tangent.x, startFrame.tangent.z);
 scene.add(startLine);
 
 const scenery = new THREE.Group();
+const trees = [];
 const trunkGeometry = new THREE.CylinderGeometry(0.18, 0.28, 2.4, 6);
 const crownGeometry = new THREE.ConeGeometry(1.7, 4.8, 7);
 const trunkMaterial = new THREE.MeshStandardMaterial({ color: '#795b3d', roughness: 1 });
 const leafMaterials = ['#49785d', '#5a8863', '#688e62'].map((color) => new THREE.MeshStandardMaterial({ color, roughness: 1 }));
+const branchGeometry = new THREE.CylinderGeometry(0.08, 0.12, 1.55, 5);
+const branchMaterial = new THREE.MeshStandardMaterial({ color: '#6e5338', roughness: 1 });
+const crackMaterial = new THREE.MeshStandardMaterial({ color: '#30251d', roughness: 1 });
 const postGeometry = new THREE.BoxGeometry(0.28, 1.1, 0.28);
 const postMaterial = new THREE.MeshStandardMaterial({ color: '#fff3d4', roughness: 0.82 });
 for (let index = 0; index < 100; index += 1) {
@@ -105,10 +109,24 @@ for (let index = 0; index < 100; index += 1) {
       trunk.position.y = 1.1;
       const crown = new THREE.Mesh(crownGeometry, leafMaterials[index % leafMaterials.length]);
       crown.position.y = 4.2;
-      tree.add(trunk, crown);
+      const branches = [];
+      for (const branchSide of [-1, 1]) {
+        const branch = new THREE.Mesh(branchGeometry, branchMaterial);
+        branch.position.set(branchSide * 0.55, 2.8 + (index % 3) * 0.35, 0);
+        branch.rotation.z = branchSide * -0.75;
+        tree.add(branch);
+        branches.push(branch);
+      }
+      const crack = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.7, 0.035), crackMaterial);
+      crack.position.set(0.08, 1.2, 0.22);
+      crack.rotation.z = -0.32;
+      crack.visible = false;
+      tree.add(trunk, crown, crack);
       tree.position.set(x, 0, z);
-      tree.scale.setScalar(0.72 + (index % 4) * 0.13);
+      const scale = 0.72 + (index % 4) * 0.13;
+      tree.scale.setScalar(scale);
       scenery.add(tree);
+      trees.push({ tree, crown, branches, crack, x, z, scale, fallen: false });
     } else {
       const post = new THREE.Mesh(postGeometry, postMaterial);
       post.position.set(point.x + normal.x * side * 7.3, 0.3, point.z + normal.z * side * 7.3);
@@ -129,7 +147,9 @@ for (let index = 0; index < 15; index += 1) {
 
 const car = new THREE.Group();
 const bodyMaterial = new THREE.MeshStandardMaterial({ color: '#ee684d', metalness: 0.18, roughness: 0.32 });
-const body = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.68, 4.05), bodyMaterial);
+const bodyGeometry = new THREE.BoxGeometry(2.05, 0.68, 4.05, 8, 4, 12);
+const bodyOriginalPositions = bodyGeometry.attributes.position.array.slice();
+const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
 body.position.y = 0.92;
 car.add(body);
 const hood = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.26, 1.18), bodyMaterial);
@@ -139,21 +159,40 @@ const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.7, 1.75), new THREE.Me
 cabin.position.set(0, 1.48, -0.45);
 car.add(cabin);
 const tireMaterial = new THREE.MeshStandardMaterial({ color: '#242827', roughness: 0.85 });
+const wheels = [];
 for (const x of [-1.03, 1.03]) {
   for (const z of [-1.25, 1.24]) {
     const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.46, 0.3, 12), tireMaterial);
     wheel.rotation.z = Math.PI / 2;
     wheel.position.set(x, 0.55, z);
     car.add(wheel);
+    wheels.push({ mesh: wheel, x, z });
   }
 }
 const lampMaterial = new THREE.MeshStandardMaterial({ color: '#fff2bd', emissive: '#e5c37b', emissiveIntensity: 0.65 });
+const headlights = [];
 for (const x of [-0.66, 0.66]) {
   const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.18, 0.12), lampMaterial);
   lamp.position.set(x, 1.02, 2.04);
   car.add(lamp);
+  headlights.push(lamp);
 }
+const frontBumper = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.18, 0.22), bodyMaterial);
+frontBumper.position.set(0, 0.62, 2.08);
+const rearBumper = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.18, 0.22), bodyMaterial);
+rearBumper.position.set(0, 0.62, -2.08);
+car.add(frontBumper, rearBumper);
+const bumpers = [frontBumper, rearBumper];
 scene.add(car);
+
+const smokeMaterial = new THREE.MeshStandardMaterial({ color: '#e2e8df', transparent: true, opacity: 0, depthWrite: false });
+const smokeGeometry = new THREE.SphereGeometry(0.28, 7, 6);
+const smokePuffs = Array.from({ length: 14 }, () => {
+  const puff = new THREE.Mesh(smokeGeometry, smokeMaterial.clone());
+  puff.visible = false;
+  scene.add(puff);
+  return { mesh: puff, life: 0, velocity: new THREE.Vector3() };
+});
 
 const ui = {
   credits: document.querySelector('#credits'), speed: document.querySelector('#speed'), gear: document.querySelector('#gear'),
@@ -161,6 +200,7 @@ const ui = {
   modeLabel: document.querySelector('#mode-label'), driftScore: document.querySelector('#drift-score'),
   personalBest: document.querySelector('#personal-best'), welcome: document.querySelector('#welcome-panel'),
   pausePanel: document.querySelector('#pause-panel'), hud: document.querySelector('#game-hud'), feedback: document.querySelector('#drive-feedback'),
+  repairButton: document.querySelector('#repair-button'), impactMessage: document.querySelector('#impact-message'),
 };
 const storageKey = 'apex-run-save-v1';
 let saveData;
@@ -182,6 +222,10 @@ let lateralVelocity = 0;
 let driftPoints = 0;
 let lapStartedAt = 0;
 let bestLap = Infinity;
+let collisionCooldown = 0;
+let carDamage = 0;
+let dents = [];
+let smokeEmissionTimer = 0;
 const keys = new Set();
 const clock = new THREE.Clock();
 let audioContext;
@@ -251,14 +295,170 @@ function showPause(title, copy) {
   setPanel('pause');
 }
 
+function rebuildBodyGeometry() {
+  const positions = bodyGeometry.attributes.position.array;
+  positions.set(bodyOriginalPositions);
+  for (const dent of dents) {
+    for (let index = 0; index < positions.length; index += 3) {
+      const x = bodyOriginalPositions[index];
+      const y = bodyOriginalPositions[index + 1];
+      const z = bodyOriginalPositions[index + 2];
+      const faceCoordinate = dent.axis === 'x' ? x : z;
+      if (faceCoordinate * dent.direction < (dent.axis === 'x' ? 0.92 : 1.86)) continue;
+      const distance = dent.axis === 'x' ? Math.abs(z - dent.center) : Math.abs(x - dent.center);
+      const influence = Math.max(0, 1 - distance / dent.radius);
+      const weight = influence * influence * Math.max(0.35, 1 - Math.abs(y) / 0.9);
+      if (dent.axis === 'x') positions[index] -= dent.direction * dent.depth * weight;
+      else positions[index + 2] -= dent.direction * dent.depth * weight;
+      positions[index + 1] -= dent.depth * 0.22 * weight;
+    }
+  }
+  bodyGeometry.attributes.position.needsUpdate = true;
+  bodyGeometry.computeVertexNormals();
+}
+
+function repairCar(force = false) {
+  if (carDamage === 0 || (gameState === 'ended' && !force)) return;
+  dents = [];
+  carDamage = 0;
+  rebuildBodyGeometry();
+  body.scale.set(1, 1, 1);
+  hood.position.set(0, 1.28, 1.12);
+  for (const wheel of wheels) wheel.mesh.visible = true;
+  for (const lamp of headlights) lamp.visible = true;
+  for (const bumper of bumpers) bumper.visible = true;
+  ui.repairButton.disabled = true;
+  ui.repairButton.classList.remove('has-damage');
+  ui.impactMessage.classList.remove('is-visible');
+}
+
+function applyTreeDamage(treeData, impactSpeed) {
+  if (impactSpeed < 10) return;
+  treeData.crown.visible = false;
+  if (impactSpeed >= 20) treeData.crack.visible = true;
+  if (impactSpeed >= 40) {
+    treeData.branches[0].visible = false;
+    treeData.crown.scale.setScalar(0.45);
+  }
+  if (impactSpeed > 80 && !treeData.fallen) {
+    treeData.fallen = true;
+    treeData.branches.forEach((branch) => { branch.visible = false; });
+    treeData.tree.rotation.z = treeData.x >= car.position.x ? Math.PI / 2 : -Math.PI / 2;
+    treeData.tree.position.y = 0.15;
+  }
+}
+
+function applyCarDamage(impactSpeed, localImpact) {
+  if (impactSpeed < 10) return;
+  let axis;
+  let direction;
+  let center;
+  if (Math.abs(localImpact.x) > Math.abs(localImpact.z) * 0.52) {
+    axis = 'x';
+    direction = Math.sign(localImpact.x) || 1;
+    center = THREE.MathUtils.clamp(localImpact.z, -1.65, 1.65);
+  } else {
+    axis = 'z';
+    direction = Math.sign(localImpact.z) || 1;
+    center = THREE.MathUtils.clamp(localImpact.x, -0.75, 0.75);
+  }
+  const depth = impactSpeed < 20 ? 0.1 : impactSpeed < 40 ? 0.3 : impactSpeed <= 80 ? 0.42 : 0.58;
+  dents.push({ axis, direction, center, depth, radius: impactSpeed < 20 ? 0.72 : 1.05 });
+  rebuildBodyGeometry();
+  carDamage = Math.min(1, carDamage + depth);
+  body.scale.y = Math.max(0.78, 1 - carDamage * 0.2);
+  if (axis === 'z' && direction > 0) hood.position.y = Math.max(1.02, hood.position.y - depth * 0.25);
+
+  if (impactSpeed >= 40) {
+    if (axis === 'z') {
+      (direction > 0 ? frontBumper : rearBumper).visible = false;
+      if (direction > 0) headlights[center < 0 ? 0 : 1].visible = false;
+    } else {
+      const targetWheel = wheels.reduce((closest, wheel) => {
+        const distance = Math.abs(wheel.x - direction * 1.03) + Math.abs(wheel.z - center);
+        return distance < closest.distance ? { wheel, distance } : closest;
+      }, { wheel: wheels[0], distance: Infinity }).wheel;
+      targetWheel.mesh.visible = false;
+    }
+  }
+  if (impactSpeed > 80) {
+    wheels.forEach((wheel) => { wheel.mesh.visible = false; });
+    bumpers.forEach((bumper) => { bumper.visible = false; });
+    headlights[center < 0 ? 0 : 1].visible = false;
+  }
+  ui.repairButton.disabled = false;
+  ui.repairButton.classList.add('has-damage');
+}
+
+function showImpact(message) {
+  ui.impactMessage.textContent = message;
+  ui.impactMessage.classList.add('is-visible');
+  window.clearTimeout(showImpact.timeout);
+  showImpact.timeout = window.setTimeout(() => ui.impactMessage.classList.remove('is-visible'), 2200);
+}
+
+function finishWithCrash() {
+  gameState = 'ended';
+  elapsed = 0;
+  speed = 0;
+  lateralVelocity = 0;
+  keys.clear();
+  ui.speed.textContent = '000';
+  ui.gear.textContent = 'N';
+  ui.timer.textContent = formatTime(0);
+  document.querySelector('#result-title').innerHTML = 'GAME<br /><em>OVER.</em>';
+  document.querySelector('#result-copy').textContent = 'Impacto crítico. O carro não pode continuar.';
+  document.querySelector('#result-time').textContent = formatTime(0);
+  document.querySelector('#result-score').textContent = Math.floor(driftPoints).toLocaleString('pt-BR');
+  document.querySelector('#resume-button span').textContent = 'TENTAR DE NOVO';
+  setPanel('pause');
+}
+
+function checkTreeCollisions() {
+  if (collisionCooldown > 0 || gameState !== 'playing') return;
+  let nearest = null;
+  let nearestDistance = Infinity;
+  for (const treeData of trees) {
+    if (treeData.fallen) continue;
+    const dx = treeData.x - car.position.x;
+    const dz = treeData.z - car.position.z;
+    const distance = Math.hypot(dx, dz);
+    const collisionRadius = 2.8 + treeData.scale * 0.55;
+    if (distance < collisionRadius && distance < nearestDistance) {
+      nearest = treeData;
+      nearestDistance = distance;
+    }
+  }
+  if (!nearest) return;
+
+  const impactSpeed = speed * 4;
+  const localImpact = new THREE.Vector3(nearest.x - car.position.x, 0, nearest.z - car.position.z)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), -car.rotation.y);
+  applyTreeDamage(nearest, impactSpeed);
+  applyCarDamage(impactSpeed, localImpact);
+  collisionCooldown = 1.1;
+  speed = impactSpeed > 80 ? 0 : speed * (impactSpeed < 10 ? 0.55 : 0.24);
+  lateralVelocity *= -0.3;
+
+  if (impactSpeed > 80) {
+    showImpact('COLISÃO CRÍTICA · GAME OVER');
+    finishWithCrash();
+  } else if (impactSpeed >= 40) showImpact('IMPACTO FORTE · PEÇAS PERDIDAS');
+  else if (impactSpeed >= 20) showImpact('IMPACTO · LATARIA AMASSADA');
+  else if (impactSpeed >= 10) showImpact('IMPACTO LEVE · FOLHAS CAÍRAM');
+  else showImpact('TOQUE LEVE · SEM DANOS');
+}
+
 function startGame() {
   initializeEngineSound();
+  repairCar(true);
   elapsed = 0;
   distanceTravelled = 0;
   speed = 0;
   lateralOffset = 0;
   lateralVelocity = 0;
   driftPoints = 0;
+  collisionCooldown = 0;
   bestLap = Infinity;
   lapStartedAt = 0;
   gameState = 'playing';
@@ -281,6 +481,7 @@ function finishGame() {
 }
 
 document.querySelector('#start-button').addEventListener('click', startGame);
+ui.repairButton.addEventListener('click', repairCar);
 document.querySelector('#resume-button').addEventListener('click', () => {
   if (gameState === 'ended') {
     startGame();
@@ -345,6 +546,7 @@ const smoothFactor = (dt, response) => 1 - Math.exp(-response * dt);
 function updateDriving(dt) {
   if (gameState === 'playing') {
     elapsed += dt;
+    collisionCooldown = Math.max(0, collisionCooldown - dt);
     const accelerating = inputValue('KeyW', 'ArrowUp');
     const braking = inputValue('KeyS', 'ArrowDown');
     const handbrake = inputValue('Space');
@@ -390,12 +592,40 @@ function updateDriving(dt) {
   car.position.lerp(carPosition, smoothFactor(dt, 13));
   car.position.y = Math.sin(elapsed * 15) * Math.min(speed / 64, 1) * 0.025;
   car.rotation.y = Math.atan2(tangent.x, tangent.z) + THREE.MathUtils.clamp(lateralVelocity * 0.018, -0.48, 0.48);
+  const driftStrength = THREE.MathUtils.clamp(Math.abs(lateralVelocity) / 5, 0, 1);
+  body.rotation.z = -Math.sign(lateralVelocity) * driftStrength * 0.18;
 
   desiredCameraPosition.set(car.position.x - tangent.x * 11, car.position.y + 5.2 + speed * 0.018, car.position.z - tangent.z * 11);
   cameraPosition.lerp(desiredCameraPosition, smoothFactor(dt, 4.2));
   camera.position.copy(cameraPosition);
   cameraTarget.set(car.position.x + tangent.x * 7, car.position.y + 1.25, car.position.z + tangent.z * 7);
   camera.lookAt(cameraTarget);
+  updateDriftSmoke(dt, driftStrength);
+  checkTreeCollisions();
+}
+
+function updateDriftSmoke(dt, driftStrength) {
+  smokeEmissionTimer -= dt;
+  if (gameState === 'playing' && speed > 10 && driftStrength > 0.35 && smokeEmissionTimer <= 0) {
+    smokeEmissionTimer = 0.075;
+    for (const side of [-0.82, 0.82]) {
+      const puff = smokePuffs.find((particle) => particle.life <= 0);
+      if (!puff) break;
+      puff.mesh.position.copy(car.localToWorld(new THREE.Vector3(side, 0.36, -1.65)));
+      puff.velocity.set((Math.random() - 0.5) * 0.65, 0.5 + Math.random() * 0.45, (Math.random() - 0.5) * 0.65);
+      puff.life = 0.72;
+      puff.mesh.scale.setScalar(0.45 + Math.random() * 0.25);
+      puff.mesh.visible = true;
+    }
+  }
+  for (const puff of smokePuffs) {
+    if (puff.life <= 0) continue;
+    puff.life -= dt;
+    puff.mesh.position.addScaledVector(puff.velocity, dt);
+    puff.mesh.scale.multiplyScalar(1 + dt * 1.1);
+    puff.mesh.material.opacity = Math.max(0, puff.life / 0.72) * 0.34;
+    if (puff.life <= 0) puff.mesh.visible = false;
+  }
 }
 
 function animate() {
@@ -409,4 +639,5 @@ const initialFrame = trackFrame(0.15);
 car.position.copy(initialFrame.point);
 camera.position.set(car.position.x - initialFrame.tangent.x * 11, 5.5, car.position.z - initialFrame.tangent.z * 11);
 camera.lookAt(car.position.x, 1, car.position.z);
+
 animate();

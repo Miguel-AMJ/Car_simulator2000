@@ -65,6 +65,13 @@ h1 em, h2 em { color: var(--lime); font-style: normal; }
 .progress-track { height: 3px; background: rgba(245, 244, 233, .2); }
 .progress-track i { display: block; width: 0; height: 100%; background: var(--lime); transition: width 100ms linear; }
 .pause-button { margin-left: 15px; }
+.hud-actions { display: flex; gap: 8px; margin-left: 14px; }
+.hud-actions .icon-button { margin: 0; }
+.repair-button { font-size: 16px; }
+.repair-button:disabled { cursor: not-allowed; opacity: .38; }
+.repair-button.has-damage { border-color: var(--lime); color: var(--lime); box-shadow: 0 0 14px rgba(211, 239, 116, .2); }
+.impact-message { position: absolute; z-index: 3; top: 174px; left: 50%; padding: 9px 14px; border-left: 2px solid var(--coral); background: rgba(16, 24, 21, .82); color: var(--paper); font-size: 9px; font-weight: 700; letter-spacing: .09em; opacity: 0; pointer-events: none; transform: translate(-50%, -7px); transition: opacity 160ms ease, transform 160ms ease; }
+.impact-message.is-visible { opacity: 1; transform: translate(-50%, 0); }
 .drive-feedback { position: absolute; z-index: 2; right: clamp(24px, 8vw, 132px); bottom: 20%; display: grid; grid-template-columns: auto auto; column-gap: 8px; align-items: baseline; padding: 11px 14px; border-left: 2px solid var(--lime); background: rgba(16, 24, 21, .72); opacity: 0; transform: translateX(10px); transition: opacity 160ms ease, transform 160ms ease; }
 .drive-feedback.is-visible { opacity: 1; transform: translateX(0); }
 .drive-feedback span { color: var(--lime); font-size: 8px; font-weight: 700; letter-spacing: .1em; }
@@ -114,7 +121,9 @@ h1 em, h2 em { color: var(--lime); font-style: normal; }
   .hud-center { min-width: 135px; width: 48%; }
   .hud-label { font-size: 7px; }
   .race-stats { font-size: 14px; }
-  .pause-button { width: 34px; height: 34px; margin-left: 8px; }
+  .hud-actions { gap: 6px; margin-left: 8px; }
+  .hud-actions .icon-button { width: 34px; height: 34px; }
+  .impact-message { top: 146px; max-width: calc(100% - 32px); white-space: nowrap; }
   .touch-controls { display: flex; }
   .drive-feedback { right: 22px; bottom: 185px; }
   .scene-vignette { background: linear-gradient(90deg, rgba(14, 23, 20, .68), rgba(15, 24, 21, .15) 90%), linear-gradient(0deg, rgba(13, 20, 17, .68), transparent 34%, transparent 67%, rgba(15, 22, 20, .25)); }
