@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101513" />
+    <meta name="description" content="Apex Run: corrida arcade 3D direto no navegador." />
+    <title>Apex Run | Corrida de rua</title>
+  </head>
+  <body>
+    <main class="game-shell" aria-label="Apex Run, jogo de corrida">
+      <div id="scene" class="scene" aria-hidden="true"></div>
+      <div class="scene-vignette" aria-hidden="true"></div>
+      <header class="topbar">
+        <a class="wordmark" href="#" aria-label="Apex Run início"><span class="mark-icon" aria-hidden="true">A</span><span>APEX<span class="wordmark-light">RUN</span></span></a>
+        <div class="topbar-meta"><span class="connection"><i></i> CIRCUITO LOCAL</span><span class="credits"><span aria-hidden="true">◆</span> <b id="credits">0</b> CR</span><button class="icon-button" id="sound-toggle" type="button" aria-label="Ativar ou desativar som" title="Som">♫</button></div>
+      </header>
+      <section class="game-hud" id="game-hud" aria-live="polite">
+        <div class="hud-left"><div class="speed-readout"><strong id="speed">000</strong><span>KM/H</span></div><div class="gear-readout">MARCHA <b id="gear">1</b></div></div>
+        <div class="hud-center"><div class="hud-label" id="mode-label">SPRINT · COSTA DOURADA</div><div class="race-stats"><span id="lap">VOLTA 1 / 3</span><span class="stat-separator"></span><span id="timer">01:30.0</span></div><div class="progress-track"><i id="progress"></i></div></div>
+        <button class="icon-button pause-button" id="pause-button" type="button" aria-label="Pausar corrida" title="Pausar">Ⅱ</button>
+      </section>
+      <aside class="drive-feedback" id="drive-feedback" aria-live="polite"><span class="feedback-label">DRIFT</span><strong id="drift-score">0</strong><span>PTS</span></aside>
+      <section class="welcome-panel" id="welcome-panel">
+        <div class="season-line"><span class="season-dot"></span> TEMPORADA 01 <span class="season-rule"></span> COSTA DOURADA</div>
+        <h1>DOMINE<br />A <em>CURVA.</em></h1>
+        <p class="welcome-copy">Asfalto aberto. Motor ligado.<br />A próxima volta é sua.</p>
+        <div class="mode-picker" role="group" aria-label="Escolha o modo de jogo">
+          <button class="mode-button is-selected" type="button" data-mode="sprint"><span class="mode-index">01</span><span><b>Sprint</b><small>3 voltas · contra o relógio</small></span><i>↗</i></button>
+          <button class="mode-button" type="button" data-mode="drift"><span class="mode-index">02</span><span><b>Drift attack</b><small>60 s · faça pontos</small></span><i>↗</i></button>
+          <button class="mode-button" type="button" data-mode="free"><span class="mode-index">03</span><span><b>Passeio livre</b><small>Sem pressão · sem limites</small></span><i>↗</i></button>
+        </div>
+        <div class="panel-actions"><button class="start-button" id="start-button" type="button"><span>COMEÇAR A CORRIDA</span><b aria-hidden="true">→</b></button><div class="personal-best"><span>SEU MELHOR</span><b id="personal-best">--:--.---</b></div></div>
+        <div class="control-hint"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span>ou setas para dirigir</span><span class="hint-divider">·</span><span class="keycap">ESPAÇO</span><span>freio de mão</span></div>
+      </section>
+      <section class="pause-panel is-hidden" id="pause-panel" aria-live="polite">
+        <span class="season-line">PIT STOP <span class="season-rule"></span> CORRIDA PAUSADA</span><h2 id="result-title">PAUSA<br />NO <em>BOX.</em></h2><p id="result-copy">Respire. A pista continua aqui.</p>
+        <div class="result-stats"><span>TEMPO <b id="result-time">00:00.0</b></span><span>PONTOS <b id="result-score">0</b></span></div>
+        <button class="start-button" id="resume-button" type="button"><span>VOLTAR À PISTA</span><b aria-hidden="true">→</b></button><button class="text-button" id="menu-button" type="button">SAIR PARA O MENU</button>
+      </section>
+      <footer class="bottom-bar">
+        <div class="track-caption"><span class="caption-number">01</span><span><b>ESTRADA DO FAROL</b><small>BAÍA NORTE · 4,8 KM</small></span></div><div class="track-condition"><span class="sun-icon" aria-hidden="true">☼</span><span>SECO</span><i></i><span>24°</span></div><div class="version-label">ARCADE BUILD <b>0.1</b></div>
+      </footer>
+      <div class="touch-controls" aria-label="Controles de toque"><div class="touch-steer"><button data-key="ArrowLeft" type="button" aria-label="Virar à esquerda">←</button><button data-key="ArrowRight" type="button" aria-label="Virar à direita">→</button></div><div class="touch-pedals"><button data-key="Space" class="touch-brake" type="button" aria-label="Freio de mão">DRIFT</button><button data-key="ArrowUp" class="touch-gas" type="button" aria-label="Acelerar">▲</button></div></div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
