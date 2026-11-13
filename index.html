@@ -2,9 +2,15 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1" />
     <meta name="theme-color" content="#101513" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Apex Run" />
     <meta name="description" content="Apex Run: corrida arcade 3D direto no navegador." />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/apex-run-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apex-run-icon.svg" />
     <title>Apex Run | Corrida de rua</title>
   </head>
   <body>
@@ -49,7 +55,15 @@
       <footer class="bottom-bar">
         <div class="track-caption"><span class="caption-number">01</span><span><b>ESTRADA DO FAROL</b><small>BAÍA NORTE · 4,8 KM</small></span></div><div class="track-condition"><span class="sun-icon" aria-hidden="true">☼</span><span>SECO</span><i></i><span>24°</span></div><div class="version-label">ARCADE BUILD <b>0.1</b></div>
       </footer>
-      <div class="touch-controls" aria-label="Controles de toque"><div class="touch-steer"><button data-key="ArrowLeft" type="button" aria-label="Virar à esquerda">←</button><button data-key="ArrowRight" type="button" aria-label="Virar à direita">→</button></div><div class="touch-pedals"><button data-key="Space" class="touch-brake" type="button" aria-label="Freio de mão">DRIFT</button><button data-key="Turbo" class="touch-turbo" type="button" aria-label="Ativar turbo">⚡</button><button data-key="ArrowUp" class="touch-gas" type="button" aria-label="Acelerar">▲</button></div></div>
+      <div class="touch-controls" aria-label="Controles de toque">
+        <div class="mobile-joystick" id="mobile-joystick" aria-label="Joystic virtual para virar">
+          <div class="joystick-base">
+            <div class="joystick-thumb" id="joystick-thumb"></div>
+          </div>
+        </div>
+        <div class="touch-steer"><button data-key="ArrowLeft" type="button" aria-label="Virar à esquerda">←</button><button data-key="ArrowRight" type="button" aria-label="Virar à direita">→</button></div>
+        <div class="touch-pedals"><button data-key="Space" class="touch-brake" type="button" aria-label="Freio de mão">DRIFT</button><button data-key="Turbo" class="touch-turbo" type="button" aria-label="Ativar turbo">⚡</button><button data-key="ArrowUp" class="touch-gas" type="button" aria-label="Acelerar">▲</button></div>
+      </div>
     </main>
     <script type="module" src="/src/main.js"></script>
   </body>

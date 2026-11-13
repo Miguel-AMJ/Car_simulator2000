@@ -3,10 +3,28 @@
 :root { font-family: 'DM Sans', 'Segoe UI', sans-serif; color: #f5f4e9; background: #101513; font-synthesis: none; text-rendering: optimizeLegibility; --paper: #f5f4e9; --ink: #16201c; --muted: #a5b0a7; --lime: #d3ef74; --coral: #ee684d; --panel: rgba(15, 23, 20, 0.87); }
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; }
-body { overflow: hidden; }
+body { overflow: hidden; overscroll-behavior: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 button, a { color: inherit; font: inherit; }
-button { -webkit-tap-highlight-color: transparent; }
+button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .game-shell { position: relative; width: 100%; height: 100%; min-height: 480px; overflow: hidden; background: #aacfd0; isolation: isolate; }
+@supports (padding: max(0px)) {
+  .game-shell { padding-top: env(safe-area-inset-top); }
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(9, 14, 13, 0.12), rgba(9, 14, 13, 0.32));
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+body.is-installing::before {
+  opacity: 1;
+}
 .scene, .scene canvas, .scene-vignette { position: absolute; inset: 0; width: 100%; height: 100%; }
 .scene { z-index: -2; }
 .scene canvas { display: block; }
@@ -106,9 +124,13 @@ h1 em, h2 em { color: var(--lime); font-style: normal; }
 .sun-icon { color: #f3cb73; font-size: 20px; }
 .version-label { color: rgba(245, 244, 233, .56); font-size: 8px; letter-spacing: .1em; }
 .version-label b { margin-left: 7px; color: var(--paper); }
-.touch-controls { position: absolute; z-index: 3; right: 20px; bottom: 90px; left: 20px; display: none; align-items: flex-end; justify-content: space-between; pointer-events: none; }
+.touch-controls { position: absolute; z-index: 3; right: 20px; bottom: calc(90px + env(safe-area-inset-bottom)); left: 20px; display: none; align-items: flex-end; justify-content: space-between; pointer-events: none; }
+.mobile-joystick { display: flex; align-items: center; justify-content: center; width: 130px; height: 130px; pointer-events: auto; }
+.joystick-base { position: relative; width: 100%; height: 100%; border: 1px solid rgba(245, 244, 233, .42); border-radius: 50%; background: rgba(16, 24, 21, .28); box-shadow: inset 0 0 0 1px rgba(245, 244, 233, .12); touch-action: none; }
+.joystick-base::before { content: ''; position: absolute; inset: 24px; border-radius: 50%; border: 1px solid rgba(245, 244, 233, .18); }
+.joystick-thumb { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin-left: -23px; margin-top: -23px; border: 1px solid rgba(211, 239, 116, .8); border-radius: 50%; background: rgba(211, 239, 116, .24); box-shadow: 0 0 24px rgba(211, 239, 116, .18); transition: transform 50ms linear; }
 .touch-steer, .touch-pedals { display: flex; gap: 9px; pointer-events: auto; }
-.touch-controls button { display: grid; width: 58px; height: 58px; place-items: center; border: 1px solid rgba(245, 244, 233, .5); background: rgba(16, 24, 21, .64); color: var(--paper); font-size: 22px; touch-action: none; user-select: none; }
+.touch-controls button { display: grid; width: 58px; height: 58px; place-items: center; border: 1px solid rgba(245, 244, 233, .5); background: rgba(16, 24, 21, .64); color: var(--paper); font-size: 22px; touch-action: none; user-select: none; -webkit-user-select: none; }
 .touch-controls button.is-pressed { background: var(--lime); color: var(--ink); }
 .touch-controls .touch-gas { width: 70px; height: 70px; background: rgba(211, 239, 116, .9); color: var(--ink); font-size: 25px; }
 .touch-controls .touch-brake { width: 58px; height: 48px; color: var(--lime); font-size: 8px; font-weight: 700; letter-spacing: .05em; }
@@ -138,6 +160,8 @@ h1 em, h2 em { color: var(--lime); font-style: normal; }
   .boost-button { width: 43px; height: 34px; padding: 3px 4px; font-size: 7px; }
   .impact-message { top: 146px; max-width: calc(100% - 32px); white-space: nowrap; }
   .touch-controls { display: flex; }
+  .mobile-joystick { width: 110px; height: 110px; }
+  .touch-controls button { width: 62px; height: 62px; }
   .touch-controls .touch-turbo { width: 48px; height: 58px; border-color: rgba(255, 210, 115, .72); color: #ffd273; font-size: 22px; }
   .drive-feedback { right: 22px; bottom: 185px; }
   .scene-vignette { background: linear-gradient(90deg, rgba(14, 23, 20, .68), rgba(15, 24, 21, .15) 90%), linear-gradient(0deg, rgba(13, 20, 17, .68), transparent 34%, transparent 67%, rgba(15, 22, 20, .25)); }

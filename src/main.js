@@ -1,6 +1,14 @@
 import * as THREE from 'three';
 import './style.css';
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Ignora falhas em ambientes sem suporte ou sem HTTPS.
+    });
+  });
+}
+
 const root = document.querySelector('#scene');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#a9d8df');
@@ -235,6 +243,12 @@ const normalSpeedLimit = 64;
 const turboSpeedLimit = 82;
 const fatalImpactSpeed = 250;
 const keys = new Set();
+const mobileJoystick = document.querySelector('#mobile-joystick');
+const joystickThumb = document.querySelector('#joystick-thumb');
+let mobileSteer = 0;
+let mobileGas = false;
+let mobileBrake = false;
+let mobileTurbo = false;
 const clock = new THREE.Clock();
 let audioContext;
 let engineOscillator;
@@ -578,6 +592,53 @@ window.addEventListener('keydown', (event) => {
 });
 window.addEventListener('keyup', (event) => keys.delete(event.code));
 window.addEventListener('blur', () => keys.clear());
+function updateJoystickPosition(clientX, clientY) {
+  if (!mobileJoystick) return;
+  const rect = mobileJoystick.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const dx = clientX - centerX;
+  const dy = clientY - centerY;
+  const maxDistance = rect.width * 0.32;
+  const distance = Math.hypot(dx, dy);
+  const clamped = distance > maxDistance ? maxDistance : distance;
+  const angle = Math.atan2(dy, dx);
+  const limitedX = clamped * Math.cos(angle);
+  const limitedY = clamped * Math.sin(angle);
+  const offsetX = limitedX;
+  const offsetY = limitedY;
+  joystickThumb.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  mobileSteer = THREE.MathUtils.clamp(offsetX / maxDistance, -1, 1);
+  mobileGas = offsetY < -11 && Math.abs(offsetY) > Math.abs(offsetX) * 0.8;
+  mobileBrake = offsetY > 11 && Math.abs(offsetY) > Math.abs(offsetX) * 0.8;
+  mobileTurbo = offsetY < -18 && Math.abs(offsetY) > Math.abs(offsetX);
+}
+
+if (mobileJoystick && joystickThumb) {
+  mobileJoystick.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    mobileJoystick.setPointerCapture(event.pointerId);
+    updateJoystickPosition(event.clientX, event.clientY);
+  });
+  mobileJoystick.addEventListener('pointermove', (event) => {
+    if (event.pressure === 0 && !mobileJoystick.hasPointerCapture(event.pointerId)) return;
+    updateJoystickPosition(event.clientX, event.clientY);
+  });
+  const resetJoystick = (event) => {
+    if (event && 'pointerId' in event) {
+      try { mobileJoystick.releasePointerCapture(event.pointerId); } catch { /* ignorar */ }
+    }
+    joystickThumb.style.transform = 'translate(0, 0)';
+    mobileSteer = 0;
+    mobileGas = false;
+    mobileBrake = false;
+    mobileTurbo = false;
+  };
+  mobileJoystick.addEventListener('pointerup', resetJoystick);
+  mobileJoystick.addEventListener('pointercancel', resetJoystick);
+  mobileJoystick.addEventListener('pointerleave', resetJoystick);
+}
+
 document.querySelectorAll('.touch-controls button').forEach((button) => {
   const press = (event) => { event.preventDefault(); keys.add(button.dataset.key); button.classList.add('is-pressed'); };
   const release = (event) => { event.preventDefault(); keys.delete(button.dataset.key); button.classList.remove('is-pressed'); };
@@ -607,11 +668,11 @@ function updateDriving(dt) {
   if (gameState === 'playing') {
     elapsed += dt;
     collisionCooldown = Math.max(0, collisionCooldown - dt);
-    const accelerating = inputValue('KeyW', 'ArrowUp');
-    const braking = inputValue('KeyS', 'ArrowDown');
+    const accelerating = inputValue('KeyW', 'ArrowUp') || mobileGas;
+    const braking = inputValue('KeyS', 'ArrowDown') || mobileBrake;
     const handbrake = inputValue('Space');
-    updateTurboCharge(dt, inputValue('ShiftLeft', 'ShiftRight', 'Turbo'));
-    const steering = Number(inputValue('KeyD', 'ArrowRight')) - Number(inputValue('KeyA', 'ArrowLeft'));
+    updateTurboCharge(dt, inputValue('ShiftLeft', 'ShiftRight', 'Turbo') || mobileTurbo);
+    const steering = Number(inputValue('KeyD', 'ArrowRight')) - Number(inputValue('KeyA', 'ArrowLeft')) + mobileSteer;
     const progress = (0.15 + distanceTravelled / trackLength) % 1;
     const { tangent } = trackFrame(progress);
     const targetSpeed = assistEnabled ? getAssistTargetSpeed(progress, tangent) : 0;

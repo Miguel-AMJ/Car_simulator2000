@@ -6,8 +6,39 @@ Jogo arcade 3D de direção no navegador, feito com Vite, JavaScript e Three.js.
 
 Requer Node.js 20.19+ ou 22.12+.
 
+### Windows (mais simples)
+
+Use o atalho [launcher-windows.vbs](launcher-windows.vbs) ou clique em [start-game.bat](start-game.bat).
+
+Ou no terminal:
+
 ```bash
 npm install
+npm start
+```
+
+### Linux (mais simples)
+
+Use [start-game.sh](start-game.sh) ou o arquivo [launcher-linux.desktop](launcher-linux.desktop) para criar um atalho.
+
+No terminal:
+
+```bash
+chmod +x ./start-game.sh
+./start-game.sh
+```
+
+### Desktop local sem terminal
+
+Abra [desktop-launcher.html](desktop-launcher.html) e clique em “Jogar”. Ele leva para a versão compilada em [dist/index.html](dist/index.html).
+
+### Android / iPhone
+
+Abra o jogo no navegador do celular e escolha a opção de instalar como app na tela inicial ou em “Adicionar à tela inicial”. Isso funciona como PWA e fica bem mais estável que abrir como arquivo simples.
+
+Se preferir, também pode usar:
+
+```bash
 npm run dev
 ```
 

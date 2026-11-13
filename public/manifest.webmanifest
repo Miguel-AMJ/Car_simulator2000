@@ -1,0 +1,34 @@
+{
+  "name": "Apex Run",
+  "short_name": "ApexRun",
+  "description": "Corrida arcade 3D de rua direto no navegador.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101513",
+  "theme_color": "#101513",
+  "orientation": "landscape",
+  "screenshots": [
+    {
+      "src": "/splash-screen.svg",
+      "sizes": "1280x1280",
+      "type": "image/svg+xml",
+      "platform": "wide",
+      "label": "Apex Run splash screen"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/apex-run-icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apex-run-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

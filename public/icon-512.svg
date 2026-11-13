@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Apex Run icon">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#d3ef74"/>
+      <stop offset="100%" stop-color="#ee684d"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="#101513"/>
+  <circle cx="256" cy="256" r="200" fill="url(#bg)" opacity="0.96"/>
+  <path d="M120 270h272l46 76H86l34-76zm54-96h132l52 96H122l52-96z" fill="#101513" opacity="0.9"/>
+  <circle cx="184" cy="334" r="30" fill="#101513"/>
+  <circle cx="328" cy="334" r="30" fill="#101513"/>
+  <circle cx="184" cy="334" r="12" fill="#d3ef74"/>
+  <circle cx="328" cy="334" r="12" fill="#d3ef74"/>
+  <path d="M208 150h96l28 48H180l28-48z" fill="#f5f4e9" opacity="0.8"/>
+</svg>

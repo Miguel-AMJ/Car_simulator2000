@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1280" role="img" aria-label="Apex Run splash screen">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#071110"/>
+      <stop offset="50%" stop-color="#0d1c1a"/>
+      <stop offset="100%" stop-color="#101513"/>
+    </linearGradient>
+    <linearGradient id="car" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#d3ef74"/>
+      <stop offset="100%" stop-color="#ee684d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="1280" fill="url(#bg)"/>
+  <circle cx="640" cy="430" r="250" fill="url(#car)" opacity="0.95"/>
+  <path d="M420 700h420l90 140H330l90-140zm120-160h180l90 160H450l90-160z" fill="#0d1c1a" opacity="0.9"/>
+  <circle cx="520" cy="830" r="52" fill="#0d1c1a"/>
+  <circle cx="760" cy="830" r="52" fill="#0d1c1a"/>
+  <circle cx="520" cy="830" r="20" fill="#d3ef74"/>
+  <circle cx="760" cy="830" r="20" fill="#d3ef74"/>
+  <path d="M558 370h172l52 96H506l52-96z" fill="#f5f4e9" opacity="0.8"/>
+  <path d="M596 248l64 56-34 34-34-34-34 34-34-34 64-56z" fill="#f5f4e9" opacity="0.9"/>
+  <text x="640" y="1030" text-anchor="middle" fill="#f5f4e9" font-size="136" font-family="Arial, sans-serif" font-weight="700" letter-spacing="8">APEX RUN</text>
+</svg>

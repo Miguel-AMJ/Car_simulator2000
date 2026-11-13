@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Apex Run
+Comment=Jogo de corrida 3D
+Exec=/bin/bash -lc 'cd "$(dirname "%k")" && ./start-game.sh'
+Path=/home/usuario/Car_simulator2000
+Terminal=false
+Categories=Game;
