@@ -19,7 +19,7 @@
       <div class="scene-vignette" aria-hidden="true"></div>
       <header class="topbar">
         <a class="wordmark" href="#" aria-label="Apex Run início"><span class="mark-icon" aria-hidden="true">A</span><span>APEX<span class="wordmark-light">RUN</span></span></a>
-        <div class="topbar-meta"><span class="connection"><i></i> CIRCUITO LOCAL</span><span class="credits"><span aria-hidden="true">◆</span> <b id="credits">0</b> CR</span><button class="icon-button" id="sound-toggle" type="button" aria-label="Ativar ou desativar som" title="Som">♫</button></div>
+        <div class="topbar-meta"><span class="connection"><i></i> CIRCUITO LOCAL</span><span class="credits"><span aria-hidden="true">◆</span> <b id="credits">0</b> CR</span><button class="icon-button install-button" id="install-button" type="button" aria-label="Instalar app" title="Instalar app" hidden>⇩</button><button class="icon-button" id="sound-toggle" type="button" aria-label="Ativar ou desativar som" title="Som">♫</button></div>
       </header>
       <section class="game-hud" id="game-hud" aria-live="polite">
         <div class="hud-left"><div class="speed-readout"><strong id="speed">000</strong><span>KM/H</span></div><div class="gear-readout">MARCHA <b id="gear">1</b></div></div>
@@ -45,6 +45,7 @@
           <button class="mode-button" type="button" data-mode="free"><span class="mode-index">03</span><span><b>Passeio livre</b><small>Sem pressão · sem limites</small></span><i>↗</i></button>
         </div>
         <div class="panel-actions"><button class="start-button" id="start-button" type="button"><span>COMEÇAR A CORRIDA</span><b aria-hidden="true">→</b></button><div class="personal-best"><span>SEU MELHOR</span><b id="personal-best">--:--.---</b></div></div>
+        <button class="install-banner" id="install-banner" type="button" aria-label="Instalar app" hidden>INSTALAR APP</button>
         <div class="control-hint"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span>ou setas para dirigir</span><span class="hint-divider">·</span><span class="keycap">ESPAÇO</span><span>freio de mão</span><span class="hint-divider">·</span><span class="keycap">SHIFT</span><span>turbo</span></div>
       </section>
       <section class="pause-panel is-hidden" id="pause-panel" aria-live="polite">

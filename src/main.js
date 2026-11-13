@@ -10,6 +10,46 @@ if ('serviceWorker' in navigator) {
 }
 
 const root = document.querySelector('#scene');
+const installButton = document.querySelector('#install-button');
+const installBanner = document.querySelector('#install-banner');
+let deferredInstallPrompt = null;
+
+function showInstallPrompt() {
+  if (installButton) installButton.hidden = false;
+  if (installBanner) installBanner.hidden = false;
+}
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  showInstallPrompt();
+});
+
+async function installApp() {
+  if (!deferredInstallPrompt) {
+    showImpact('USE O MENU DO NAVEGADOR PARA INSTALAR');
+    return;
+  }
+
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') {
+    showImpact('APP INSTALADO COM SUCESSO');
+  } else {
+    showImpact('INSTALAÇÃO CANCELADA');
+  }
+  deferredInstallPrompt = null;
+  if (installButton) installButton.hidden = true;
+  if (installBanner) installBanner.hidden = true;
+}
+
+if (installButton) {
+  installButton.addEventListener('click', installApp);
+}
+if (installBanner) {
+  installBanner.addEventListener('click', installApp);
+}
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#a9d8df');
 scene.fog = new THREE.Fog('#a9d8df', 100, 310);
